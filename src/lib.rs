@@ -1,6 +1,8 @@
 #![feature(map_first_last)]
+#![feature(drain_filter)]
 
 use anyhow::{Context, Result};
+use std::ops::RangeBounds;
 
 use std::path::Path;
 
@@ -55,6 +57,19 @@ impl ProblemInput {
         Ok(Self { lines })
     }
 
+    pub fn split<R: RangeBounds<usize>>(&self, range: R) -> ProblemInput {
+        // This is not a good way to do this
+        let lines: Vec<_> = self
+            .lines
+            .iter()
+            .enumerate()
+            .filter(|(idx, _)| range.contains(idx))
+            .map(|(_, val)| val)
+            .cloned()
+            .collect();
+        ProblemInput::from(lines)
+    }
+
     pub fn parse<T: FromProblemInput>(&self) -> T {
         FromProblemInput::from(self)
     }
@@ -83,7 +98,11 @@ impl ProblemInput {
 impl FromProblemInput for Vec<Vec<i64>> {
     fn from(lines: &ProblemInput) -> Self {
         fn parse_with_sep(line: &str, sep: char) -> Vec<i64> {
-            line.split(sep).map(|v| v.parse().unwrap()).collect()
+            line.trim()
+                .split(sep)
+                .filter(|component| !component.is_empty())
+                .map(|v| v.trim().parse().unwrap())
+                .collect()
         }
         fn parse_line(line: &str) -> Vec<i64> {
             if line.contains(',') {
