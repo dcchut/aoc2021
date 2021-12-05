@@ -62,19 +62,10 @@ impl Line {
 
 impl FromProblemInputLine for Line {
     fn from_line(line: &str) -> Self {
-        let parts: Vec<_> = line.split(" -> ").collect();
-        let src: Vec<_> = parts[0]
-            .split(',')
-            .map(|c| c.parse::<i64>().unwrap())
-            .collect();
-        let dst: Vec<_> = parts[1]
-            .split(',')
-            .map(|c| c.parse::<i64>().unwrap())
-            .collect();
-
+        let points: Vec<i64> = ProblemInput::from(vec![line]).parse();
         Line {
-            src: (src[0], src[1]),
-            dst: (dst[0], dst[1]),
+            src: (points[0], points[1]),
+            dst: (points[2], points[3]),
         }
     }
 }
