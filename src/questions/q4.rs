@@ -1,5 +1,4 @@
 use crate::{FromProblemInput, ProblemInput, Skip, Solution};
-use itertools::Itertools;
 
 pub struct Q4;
 

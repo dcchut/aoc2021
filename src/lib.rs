@@ -1,5 +1,6 @@
 #![feature(map_first_last)]
 #![feature(drain_filter)]
+#![feature(array_windows)]
 
 use anyhow::{Context, Result};
 use std::ops::RangeBounds;
@@ -8,6 +9,25 @@ use std::path::Path;
 
 pub mod grid;
 pub mod questions;
+
+pub trait FromProblemInput {
+    fn from(lines: &ProblemInput) -> Self;
+}
+
+pub trait FromProblemInputLine {
+    fn from_line(line: &str) -> Self;
+}
+
+/// A trait representing a generic solution to an AoC problem.
+pub trait Solution: Send + Sync {
+    fn part1(&self, _lines: &ProblemInput) -> String {
+        String::new()
+    }
+
+    fn part2(&self, _lines: &ProblemInput) -> String {
+        String::new()
+    }
+}
 
 pub fn load_problem_input(number: usize) -> ProblemInput {
     let path = format!("data/q{}.txt", number);
@@ -73,26 +93,6 @@ impl ProblemInput {
     pub fn parse<T: FromProblemInput>(&self) -> T {
         FromProblemInput::from(self)
     }
-
-    pub fn as_csv(&self) -> Vec<String> {
-        self.lines
-            .iter()
-            .map(|line| line.split(',').map(String::from).collect::<Vec<_>>())
-            .flatten()
-            .collect()
-    }
-
-    pub fn digits(&self) -> Vec<u32> {
-        self.lines
-            .iter()
-            .map(|line| {
-                line.chars()
-                    .map(|c| c.to_digit(10).unwrap())
-                    .collect::<Vec<_>>()
-            })
-            .flatten()
-            .collect()
-    }
 }
 
 impl FromProblemInput for Vec<Vec<i64>> {
@@ -122,7 +122,7 @@ impl FromProblemInput for Vec<Vec<i64>> {
         lines
             .lines
             .iter()
-            .map(|line| parse_line(line.as_str()))
+            .map(|line| parse_line(line.as_str().trim()))
             .collect()
     }
 }
@@ -149,14 +149,6 @@ impl From<Vec<&str>> for ProblemInput {
     }
 }
 
-pub trait FromProblemInput {
-    fn from(lines: &ProblemInput) -> Self;
-}
-
-pub trait FromProblemInputLine {
-    fn from_line(line: &str) -> Self;
-}
-
 impl<T: FromProblemInputLine> FromProblemInput for Vec<T> {
     fn from(lines: &ProblemInput) -> Self {
         lines
@@ -164,49 +156,6 @@ impl<T: FromProblemInputLine> FromProblemInput for Vec<T> {
             .iter()
             .map(|s| T::from_line(s.as_str()))
             .collect()
-    }
-}
-
-/// A trait representing a generic solution to an AoC problem.
-// TODO: might want to be generic over return type
-// or perhaps Box<dyn ToString> or something like that.
-pub trait Solution: Send + Sync {
-    fn part1(&self, _lines: &ProblemInput) -> String {
-        String::new()
-    }
-
-    fn part2(&self, _lines: &ProblemInput) -> String {
-        String::new()
-    }
-}
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub struct Point {
-    pub x: i64,
-    pub y: i64,
-    pub z: i64,
-}
-
-impl Point {
-    pub fn new(x: i64, y: i64, z: i64) -> Self {
-        Self { x, y, z }
-    }
-}
-
-impl FromProblemInputLine for Point {
-    fn from_line(line: &str) -> Self {
-        let mut split = line.split(", ");
-
-        let part1 = &(split.next().unwrap())[3..];
-        let part2 = &(split.next().unwrap())[2..];
-        let part3 = split.next().unwrap();
-        let part3 = &(part3)[2..(part3.len() - 1)];
-
-        Point::new(
-            part1.parse().unwrap(),
-            part2.parse().unwrap(),
-            part3.parse().unwrap(),
-        )
     }
 }
 
