@@ -5,9 +5,9 @@
 use anyhow::{Context, Result};
 use std::ops::RangeBounds;
 
-use std::path::Path;
 use once_cell::sync::OnceCell;
 use regex::Regex;
+use std::path::Path;
 
 pub mod grid;
 pub mod questions;
@@ -97,21 +97,18 @@ impl ProblemInput {
     }
 }
 
-
 fn number_regex() -> &'static Regex {
     static REGEX: OnceCell<Regex> = OnceCell::new();
-    REGEX.get_or_init(|| {
-        Regex::new(r"\d+").unwrap()
-    })
+    REGEX.get_or_init(|| Regex::new(r"\d+").unwrap())
 }
-
 
 impl FromProblemInput for Vec<Vec<i64>> {
     fn from(lines: &ProblemInput) -> Self {
         fn parse_line(line: &str) -> Vec<i64> {
             if line.contains(',') || line.contains(' ') {
                 // this is probably a list of numbers
-                number_regex().captures_iter(line)
+                number_regex()
+                    .captures_iter(line)
                     .map(|v| v[0].parse().unwrap())
                     .collect()
             } else if let Ok(parsed) = line.parse() {
