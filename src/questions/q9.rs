@@ -52,10 +52,8 @@ impl FromProblemInput for Grid<i64> {
                 let n = grid.pos_to_index[&(y, x)];
                 if v == 9 {
                     grid.graph.remove_node(n);
-                } else {
-                    if let Some(w) = grid.graph.node_weight_mut(n) {
-                        *w = v;
-                    }
+                } else if let Some(w) = grid.graph.node_weight_mut(n) {
+                    *w = v;
                 }
             }
         }
