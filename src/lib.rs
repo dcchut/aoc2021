@@ -3,9 +3,15 @@
 #![feature(array_windows)]
 
 use anyhow::{Context, Result};
+use std::borrow::Borrow;
+use std::collections::HashMap;
+use std::hash::Hash;
 use std::ops::RangeBounds;
 
 use once_cell::sync::OnceCell;
+use petgraph::graph::NodeIndex;
+use petgraph::prelude::StableGraph;
+use petgraph::{EdgeType, Undirected};
 use regex::Regex;
 use std::path::Path;
 
@@ -77,6 +83,18 @@ impl ProblemInput {
             .collect();
 
         Ok(Self { lines })
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &str> {
+        self.lines.iter().map(|s| s.as_str())
+    }
+
+    pub fn len(&self) -> usize {
+        self.lines.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.lines.is_empty()
     }
 
     pub fn split<R: RangeBounds<usize>>(&self, range: R) -> ProblemInput {
@@ -198,5 +216,113 @@ impl FromProblemInputLine for Digits {
     fn from_line(line: &str) -> Self {
         let digits = line.chars().map(|c| c.to_digit(10).unwrap()).collect();
         Digits { digits }
+    }
+}
+
+#[derive(Default, Debug)]
+pub struct NamedGraph<N, E, I, Ty: EdgeType = Undirected> {
+    graph: StableGraph<N, E, Ty>,
+    index: HashMap<I, NodeIndex>,
+}
+
+impl<N, E, I: Hash + Ord + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
+    pub fn new() -> Self {
+        Self {
+            graph: StableGraph::with_capacity(0, 0),
+            index: HashMap::new(),
+        }
+    }
+
+    pub fn nodes_iter(&self) -> impl Iterator<Item = (I, NodeIndex, &N)> {
+        self.index
+            .iter()
+            .map(|(&ident, &index)| (ident, index, self.get_unchecked(index)))
+    }
+
+    pub fn insert<Q>(&mut self, ident: I, weight: N)
+    where
+        I: Borrow<Q>,
+        Q: Hash + Eq,
+    {
+        if let Some(index) = self.index.get(ident.borrow()) {
+            *self.graph.node_weight_mut(*index).unwrap() = weight;
+        } else {
+            let index = self.graph.add_node(weight);
+            self.index.insert(ident, index);
+        }
+    }
+
+    pub fn get_index<Q>(&self, ident: Q) -> Option<NodeIndex>
+    where
+        I: Borrow<Q>,
+        Q: Hash + Eq,
+    {
+        self.index.get(&ident).copied()
+    }
+
+    pub fn insert_edge<Q1, Q2>(&mut self, ident1: Q1, ident2: Q2, weight: E)
+    where
+        I: Borrow<Q1> + Borrow<Q2>,
+        Q1: Hash + Eq,
+        Q2: Hash + Eq,
+    {
+        let n1 = self.get_index(ident1).unwrap();
+        let n2 = self.get_index(ident2).unwrap();
+        self.graph.add_edge(n1, n2, weight);
+    }
+
+    fn get_unchecked(&self, index: NodeIndex) -> &N {
+        self.graph.node_weight(index).unwrap()
+    }
+
+    fn get_unchecked_mut(&mut self, index: NodeIndex) -> &mut N {
+        self.graph.node_weight_mut(index).unwrap()
+    }
+
+    pub fn contains<Q>(&self, ident: Q) -> bool
+    where
+        I: Borrow<Q>,
+        Q: Hash + Eq,
+    {
+        self.index.contains_key(ident.borrow())
+    }
+
+    pub fn remove<Q>(&mut self, ident: Q) -> Option<N>
+    where
+        I: Borrow<Q>,
+        Q: Hash + Eq,
+    {
+        let index = self.get_index(ident)?;
+        self.graph.remove_node(index)
+    }
+
+    pub fn get<Q>(&self, ident: Q) -> Option<&N>
+    where
+        I: Borrow<Q>,
+        Q: Hash + Eq,
+    {
+        self.get_index(ident).map(|index| self.get_unchecked(index))
+    }
+
+    pub fn get_mut<Q>(&mut self, ident: Q) -> Option<&mut N>
+    where
+        I: Borrow<Q>,
+        Q: Hash + Eq,
+    {
+        self.get_index(ident)
+            .map(|index| self.get_unchecked_mut(index))
+    }
+
+    pub fn retain_nodes<F: FnMut(I, NodeIndex, &N) -> bool>(&mut self, mut f: F) {
+        let nodes_to_remove: Vec<_> = self
+            .nodes_iter()
+            .filter(|(n, ix, w)| !f(*n, *ix, w))
+            .map(|(n, ix, _)| (n, ix))
+            .collect();
+
+        for (node, index) in nodes_to_remove {
+            self.index.remove(&node);
+            self.graph.remove_node(index);
+        }
     }
 }

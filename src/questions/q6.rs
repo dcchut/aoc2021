@@ -25,8 +25,8 @@ impl Pond {
 impl FromProblemInput for Pond {
     fn from(lines: &ProblemInput) -> Self {
         let mut fish = [0; 9];
-        for time in lines.lines[0].split(',') {
-            fish[time.parse::<usize>().unwrap()] += 1;
+        for time in lines.parse::<Vec<i64>>() {
+            fish[time as usize] += 1;
         }
         Pond { fish }
     }

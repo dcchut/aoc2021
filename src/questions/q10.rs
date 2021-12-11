@@ -48,19 +48,19 @@ fn chunk_process(chunk: &mut Vec<char>, c: char) -> bool {
 }
 
 impl Solution for Q10 {
-fn part1(&self, lines: &ProblemInput) -> String {
-    lines
-        .lines
-        .iter()
-        .filter_map(|line| {
-            let mut chunk = Vec::new();
-            line.chars()
-                .find(|c| !chunk_process(&mut chunk, *c))
-                .map(illegal_score)
-        })
-        .sum::<i64>()
-        .to_string()
-}
+    fn part1(&self, lines: &ProblemInput) -> String {
+        lines
+            .lines
+            .iter()
+            .filter_map(|line| {
+                let mut chunk = Vec::new();
+                line.chars()
+                    .find(|c| !chunk_process(&mut chunk, *c))
+                    .map(illegal_score)
+            })
+            .sum::<i64>()
+            .to_string()
+    }
 
     fn part2(&self, lines: &ProblemInput) -> String {
         let scores: Vec<_> = lines

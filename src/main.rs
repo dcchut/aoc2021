@@ -1,6 +1,6 @@
 use anyhow::Result;
-use aoc2020::questions::*;
-use aoc2020::{ProblemInput, Solution};
+use aoc2021::questions::*;
+use aoc2021::{ProblemInput, Solution};
 use crossbeam::thread;
 
 fn run_problem(solutions: &'static [Box<dyn Solution>], index: usize) -> Result<(String, String)> {
