@@ -1,5 +1,5 @@
-use std::collections::{HashMap, HashSet};
 use crate::{FromProblemInput, ProblemInput, Solution};
+use std::collections::{HashMap, HashSet};
 
 pub struct Q11;
 
@@ -22,9 +22,12 @@ impl Grid {
         // Flashing
         let mut already_flashed = HashSet::new();
         loop {
-            let flashes: Vec<_> = self.levels.iter().filter(|(node, level)| {
-                **level > 9 && !already_flashed.contains(*node)
-            }).map(|(n, _)| *n).collect();
+            let flashes: Vec<_> = self
+                .levels
+                .iter()
+                .filter(|(node, level)| **level > 9 && !already_flashed.contains(*node))
+                .map(|(n, _)| *n)
+                .collect();
 
             if flashes.is_empty() {
                 break;
@@ -53,7 +56,6 @@ impl Grid {
     }
 }
 
-
 impl FromProblemInput for Grid {
     fn from(lines: &ProblemInput) -> Self {
         let mut levels = HashMap::new();
@@ -77,6 +79,9 @@ impl Solution for Q11 {
 
     fn part2(&self, lines: &ProblemInput) -> String {
         let mut grid: Grid = lines.parse();
-        (1..).find(|_| grid.step() == grid.size()).unwrap().to_string()
+        (1..)
+            .find(|_| grid.step() == grid.size())
+            .unwrap()
+            .to_string()
     }
 }
