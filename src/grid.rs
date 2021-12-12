@@ -268,7 +268,7 @@ impl FromProblemInputLine for Vec<Movement> {
     }
 }
 
-impl FromProblemInput for (Vec<Movement>, Vec<Movement>) {
+impl FromProblemInput<'_> for (Vec<Movement>, Vec<Movement>) {
     fn from(lines: &ProblemInput) -> Self {
         let mut input = lines.parse::<Vec<Vec<Movement>>>();
 

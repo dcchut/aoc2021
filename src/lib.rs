@@ -18,8 +18,8 @@ use std::path::Path;
 pub mod grid;
 pub mod questions;
 
-pub trait FromProblemInput {
-    fn from(lines: &ProblemInput) -> Self;
+pub trait FromProblemInput<'a> {
+    fn from(lines: &'a ProblemInput) -> Self;
 }
 
 pub trait FromProblemInputLine {
@@ -110,7 +110,7 @@ impl ProblemInput {
         ProblemInput::from(lines)
     }
 
-    pub fn parse<T: FromProblemInput>(&self) -> T {
+    pub fn parse<'a, T: FromProblemInput<'a>>(&'a self) -> T {
         FromProblemInput::from(self)
     }
 }
@@ -120,7 +120,7 @@ fn number_regex() -> &'static Regex {
     REGEX.get_or_init(|| Regex::new(r"\d+").unwrap())
 }
 
-impl FromProblemInput for Vec<Vec<i64>> {
+impl FromProblemInput<'_> for Vec<Vec<i64>> {
     fn from(lines: &ProblemInput) -> Self {
         fn parse_line(line: &str) -> Vec<i64> {
             if line.contains(',') || line.contains(' ') {
@@ -145,7 +145,7 @@ impl FromProblemInput for Vec<Vec<i64>> {
     }
 }
 
-impl FromProblemInput for Vec<i64> {
+impl FromProblemInput<'_> for Vec<i64> {
     fn from(lines: &ProblemInput) -> Self {
         lines
             .parse::<Vec<Vec<i64>>>()
@@ -167,7 +167,7 @@ impl From<Vec<&str>> for ProblemInput {
     }
 }
 
-impl<T: FromProblemInputLine> FromProblemInput for Vec<T> {
+impl<T: FromProblemInputLine> FromProblemInput<'_> for Vec<T> {
     fn from(lines: &ProblemInput) -> Self {
         lines
             .lines
@@ -192,7 +192,7 @@ impl<T> Skip<T> {
     }
 }
 
-impl<T: FromProblemInput> FromProblemInput for Skip<T> {
+impl<T: for<'a> FromProblemInput<'a>> FromProblemInput<'_> for Skip<T> {
     fn from(lines: &ProblemInput) -> Self {
         // The idea is that we want to split `lines.lines` at every newline:
         // everything in between should be parsed as problem input.

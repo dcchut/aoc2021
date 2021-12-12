@@ -56,7 +56,7 @@ impl Grid {
     }
 }
 
-impl FromProblemInput for Grid {
+impl FromProblemInput<'_> for Grid {
     fn from(lines: &ProblemInput) -> Self {
         let mut levels = HashMap::new();
 

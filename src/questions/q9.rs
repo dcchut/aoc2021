@@ -9,7 +9,7 @@ pub struct Q9;
 #[derive(Debug)]
 struct Grid(NamedGraph<i64, (), (usize, usize), Undirected>);
 
-impl FromProblemInput for Grid {
+impl FromProblemInput<'_> for Grid {
     fn from(lines: &ProblemInput) -> Self {
         let mut graph = NamedGraph::new();
 

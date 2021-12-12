@@ -22,7 +22,7 @@ impl Pond {
     }
 }
 
-impl FromProblemInput for Pond {
+impl FromProblemInput<'_> for Pond {
     fn from(lines: &ProblemInput) -> Self {
         let mut fish = [0; 9];
         for time in lines.parse::<Vec<i64>>() {

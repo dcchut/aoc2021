@@ -57,7 +57,7 @@ impl BingoGame {
     }
 }
 
-impl FromProblemInput for BingoGame {
+impl FromProblemInput<'_> for BingoGame {
     fn from(lines: &ProblemInput) -> Self {
         let mut draws: Vec<i64> = lines.split(0..=0).parse();
         draws.reverse(); // reverse once so we're popping initial draws off the end
