@@ -54,8 +54,7 @@ impl Solution for Q8 {
 
         parts
             .into_iter()
-            .map(|p| p.outputs)
-            .flatten()
+            .flat_map(|p| p.outputs)
             .filter(|w| [2, 3, 4, 7].contains(&w.len()))
             .count()
             .to_string()
