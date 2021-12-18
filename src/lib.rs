@@ -1,6 +1,9 @@
 #![feature(map_first_last)]
 #![feature(drain_filter)]
 #![feature(array_windows)]
+#![feature(destructuring_assignment)]
+#![feature(const_eval_limit)]
+#![const_eval_limit = "0"]
 
 use anyhow::{Context, Result};
 use std::borrow::Borrow;
@@ -9,6 +12,7 @@ use std::hash::Hash;
 use std::ops::RangeBounds;
 
 use once_cell::sync::OnceCell;
+use petgraph::algo::{dijkstra, Measure};
 use petgraph::graph::NodeIndex;
 use petgraph::prelude::StableGraph;
 use petgraph::{EdgeType, Undirected};
@@ -219,13 +223,13 @@ impl FromProblemInputLine for Digits {
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct NamedGraph<N, E, I, Ty: EdgeType = Undirected> {
     graph: StableGraph<N, E, Ty>,
     index: HashMap<I, NodeIndex>,
 }
 
-impl<N, E, I: Hash + Ord + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
+impl<N, E, I: Hash + Eq + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
     pub fn new() -> Self {
         Self {
             graph: StableGraph::with_capacity(0, 0),
@@ -324,5 +328,43 @@ impl<N, E, I: Hash + Ord + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
             self.index.remove(&node);
             self.graph.remove_node(index);
         }
+    }
+}
+
+impl<N, E, I: Hash + Ord + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
+    pub fn min_ident_by_key<F, B: Ord>(&self, f: F) -> Option<I>
+    where
+        F: FnMut(&I) -> B,
+    {
+        self.index.keys().copied().min_by_key(f)
+    }
+
+    pub fn max_ident_by_key<F, B: Ord>(&self, mut f: F) -> Option<I>
+    where
+        F: FnMut(&I) -> B,
+    {
+        self.min_ident_by_key(|i| std::cmp::Reverse(f(i)))
+    }
+
+    pub fn min_ident(&self) -> Option<I> {
+        self.min_ident_by_key(|i| *i)
+    }
+
+    pub fn max_ident(&self) -> Option<I> {
+        self.max_ident_by_key(|i| *i)
+    }
+}
+
+impl<N, E: Measure + Copy, I: Hash + Eq + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
+    pub fn shortest_length_path<Q>(&self, ident1: Q, ident2: Q) -> Option<E>
+    where
+        I: Borrow<Q>,
+        Q: Hash + Eq,
+    {
+        let ident1 = self.get_index(ident1)?;
+        let ident2 = self.get_index(ident2)?;
+
+        let paths = dijkstra(&self.graph, ident1, Some(ident2), |w| *w.weight());
+        paths.get(&ident2).copied()
     }
 }
