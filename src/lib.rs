@@ -41,11 +41,13 @@ pub trait Solution: Send + Sync {
     }
 }
 
+#[must_use]
 pub fn load_problem_input(number: usize) -> ProblemInput {
     let path = format!("data/q{}.txt", number);
     ProblemInput::new(path).unwrap()
 }
 
+#[must_use]
 pub fn binary_search_by_key<F, T>(low: i64, high: i64, value: T, key: F) -> i64
 where
     F: Fn(i64) -> T,
@@ -90,13 +92,15 @@ impl ProblemInput {
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &str> {
-        self.lines.iter().map(|s| s.as_str())
+        self.lines.iter().map(String::as_str)
     }
 
+    #[must_use]
     pub fn len(&self) -> usize {
         self.lines.len()
     }
 
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.lines.is_empty()
     }
@@ -115,6 +119,7 @@ impl ProblemInput {
         ProblemInput::from(lines)
     }
 
+    #[must_use]
     pub fn parse<'a, T: FromProblemInput<'a>>(&'a self) -> T {
         FromProblemInput::from(self)
     }
@@ -198,12 +203,16 @@ impl<T: FromProblemInputLine + Debug, const N: usize> FromProblemInput<'_> for [
 /// separated by a newline between them.
 ///
 /// # Example usage
+/// ```rust
+/// use aoc2021::Skip;
 /// let parsed: Vec<T> = lines.parse::<Skip<T>>().unwrap();
+/// ```
 pub struct Skip<T> {
     t: Vec<T>,
 }
 
 impl<T> Skip<T> {
+    #[must_use]
     pub fn unwrap(self) -> Vec<T> {
         self.t
     }
@@ -243,6 +252,7 @@ pub struct NamedGraph<N, E, I, Ty: EdgeType = Undirected> {
 }
 
 impl<N, E, I: Hash + Eq + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             graph: StableGraph::with_capacity(0, 0),
@@ -256,12 +266,8 @@ impl<N, E, I: Hash + Eq + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
             .map(|(&ident, &index)| (ident, index, self.get_unchecked(index)))
     }
 
-    pub fn insert<Q>(&mut self, ident: I, weight: N)
-    where
-        I: Borrow<Q>,
-        Q: Hash + Eq,
-    {
-        if let Some(index) = self.index.get(ident.borrow()) {
+    pub fn insert(&mut self, ident: I, weight: N) {
+        if let Some(index) = self.index.get(&ident) {
             *self.graph.node_weight_mut(*index).unwrap() = weight;
         } else {
             let index = self.graph.add_node(weight);
@@ -269,15 +275,15 @@ impl<N, E, I: Hash + Eq + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
         }
     }
 
-    pub fn get_index<Q>(&self, ident: Q) -> Option<NodeIndex>
+    pub fn get_index<Q>(&self, ident: &Q) -> Option<NodeIndex>
     where
         I: Borrow<Q>,
         Q: Hash + Eq,
     {
-        self.index.get(&ident).copied()
+        self.index.get(ident).copied()
     }
 
-    pub fn insert_edge<Q1, Q2>(&mut self, ident1: Q1, ident2: Q2, weight: E)
+    pub fn insert_edge<Q1, Q2>(&mut self, ident1: &Q1, ident2: &Q2, weight: E)
     where
         I: Borrow<Q1> + Borrow<Q2>,
         Q1: Hash + Eq,
@@ -296,7 +302,7 @@ impl<N, E, I: Hash + Eq + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
         self.graph.node_weight_mut(index).unwrap()
     }
 
-    pub fn contains<Q>(&self, ident: Q) -> bool
+    pub fn contains<Q>(&self, ident: &Q) -> bool
     where
         I: Borrow<Q>,
         Q: Hash + Eq,
@@ -304,7 +310,7 @@ impl<N, E, I: Hash + Eq + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
         self.index.contains_key(ident.borrow())
     }
 
-    pub fn remove<Q>(&mut self, ident: Q) -> Option<N>
+    pub fn remove<Q>(&mut self, ident: &Q) -> Option<N>
     where
         I: Borrow<Q>,
         Q: Hash + Eq,
@@ -313,7 +319,7 @@ impl<N, E, I: Hash + Eq + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
         self.graph.remove_node(index)
     }
 
-    pub fn get<Q>(&self, ident: Q) -> Option<&N>
+    pub fn get<Q>(&self, ident: &Q) -> Option<&N>
     where
         I: Borrow<Q>,
         Q: Hash + Eq,
@@ -321,7 +327,7 @@ impl<N, E, I: Hash + Eq + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
         self.get_index(ident).map(|index| self.get_unchecked(index))
     }
 
-    pub fn get_mut<Q>(&mut self, ident: Q) -> Option<&mut N>
+    pub fn get_mut<Q>(&mut self, ident: &Q) -> Option<&mut N>
     where
         I: Borrow<Q>,
         Q: Hash + Eq,
@@ -345,6 +351,7 @@ impl<N, E, I: Hash + Eq + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
 }
 
 impl<N, E, I: Hash + Ord + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
+    #[must_use]
     pub fn min_ident_by_key<F, B: Ord>(&self, f: F) -> Option<I>
     where
         F: FnMut(&I) -> B,
@@ -352,6 +359,7 @@ impl<N, E, I: Hash + Ord + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
         self.index.keys().copied().min_by_key(f)
     }
 
+    #[must_use]
     pub fn max_ident_by_key<F, B: Ord>(&self, mut f: F) -> Option<I>
     where
         F: FnMut(&I) -> B,
@@ -359,17 +367,19 @@ impl<N, E, I: Hash + Ord + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
         self.min_ident_by_key(|i| std::cmp::Reverse(f(i)))
     }
 
+    #[must_use]
     pub fn min_ident(&self) -> Option<I> {
         self.min_ident_by_key(|i| *i)
     }
 
+    #[must_use]
     pub fn max_ident(&self) -> Option<I> {
         self.max_ident_by_key(|i| *i)
     }
 }
 
 impl<N, E: Measure + Copy, I: Hash + Eq + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
-    pub fn shortest_length_path<Q>(&self, ident1: Q, ident2: Q) -> Option<E>
+    pub fn shortest_length_path<Q>(&self, ident1: &Q, ident2: &Q) -> Option<E>
     where
         I: Borrow<Q>,
         Q: Hash + Eq,

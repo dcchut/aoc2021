@@ -43,7 +43,7 @@ impl BingoGame {
         }
 
         let target = self.draws.pop().unwrap();
-        for board in self.boards.iter_mut() {
+        for board in &mut self.boards {
             mark(board, target);
         }
 

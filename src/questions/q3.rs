@@ -41,7 +41,7 @@ fn filter(mut items: Vec<Vec<u32>>, flip: bool) -> i32 {
         // Shrink `items` down to only those items having the specified digit
         // in this column.
         let keep_ones = ones_geq_zeroes(iter_col(&items, col)) ^ flip;
-        items.retain(|row| row[col] == keep_ones as u32)
+        items.retain(|row| row[col] == u32::from(keep_ones));
     }
 
     assert_eq!(items.len(), 1);
@@ -59,8 +59,8 @@ impl Solution for Q3 {
             .map(|col| ones_geq_zeroes(iter_col(&digits, col)))
             .fold((0, 0), |(gamma, epsilon), digit| {
                 (
-                    (gamma * 2) + digit as u32,
-                    (epsilon * 2) + (1 - digit as u32),
+                    (gamma * 2) + u32::from(digit),
+                    (epsilon * 2) + (1 - u32::from(digit)),
                 )
             });
 

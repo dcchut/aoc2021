@@ -3,7 +3,7 @@ use aoc2021::questions::*;
 use aoc2021::{ProblemInput, Solution};
 use crossbeam::thread;
 
-fn run_problem(solutions: &'static [Box<dyn Solution>], index: usize) -> Result<(String, String)> {
+fn run_problem(solutions: &'static [Box<dyn Solution>], index: usize) -> (String, String) {
     let (part1, part2) = thread::scope(move |s| {
         let solution = &solutions[index];
 
@@ -29,7 +29,7 @@ fn run_problem(solutions: &'static [Box<dyn Solution>], index: usize) -> Result<
     })
     .unwrap();
 
-    Ok((part1.unwrap(), part2.unwrap()))
+    (part1.unwrap(), part2.unwrap())
 }
 
 fn main() -> Result<()> {
@@ -69,7 +69,7 @@ fn main() -> Result<()> {
         let index = index - 1;
 
         if index < solutions.len() {
-            let (part1, part2) = run_problem(solutions, index)?;
+            let (part1, part2) = run_problem(solutions, index);
 
             println!("Part 1: {}", part1);
             println!("Part 2: {}", part2);

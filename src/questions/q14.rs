@@ -62,7 +62,7 @@ impl PairTracker {
     fn min_max(&self) -> usize {
         // This counts every interior character twice
         let mut char_counter: DefaultHashMap<char, usize> = DefaultHashMap::default();
-        for ((l, r), count) in self.count.iter() {
+        for ((l, r), count) in &self.count {
             char_counter[*l] += *count;
             char_counter[*r] += *count;
         }

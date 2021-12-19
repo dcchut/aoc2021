@@ -142,9 +142,9 @@ fn evaluate(p: &ParsedPacket) -> (i64, i64) {
                 1 => values.into_iter().product::<i64>(),
                 2 => values.into_iter().min().unwrap(),
                 3 => values.into_iter().max().unwrap(),
-                5 => (values[0] > values[1]) as i64,
-                6 => (values[0] < values[1]) as i64,
-                7 => (values[0] == values[1]) as i64,
+                5 => i64::from(values[0] > values[1]),
+                6 => i64::from(values[0] < values[1]),
+                7 => i64::from(values[0] == values[1]),
                 _ => panic!("unrecognized type {}", p.typ),
             }
         }

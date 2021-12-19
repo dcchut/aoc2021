@@ -17,11 +17,11 @@ impl FromProblemInput<'_> for Grid {
             for (x, c) in line.chars().enumerate() {
                 let value = c.to_digit(10).unwrap() as i64;
                 graph.insert((y, x), value);
-                if x > 0 && graph.contains((y, x - 1)) {
-                    graph.insert_edge((y, x), (y, x - 1), ());
+                if x > 0 && graph.contains(&(y, x - 1)) {
+                    graph.insert_edge(&(y, x), &(y, x - 1), ());
                 }
-                if y > 0 && graph.contains((y - 1, x)) {
-                    graph.insert_edge((y, x), (y - 1, x), ());
+                if y > 0 && graph.contains(&(y - 1, x)) {
+                    graph.insert_edge(&(y, x), &(y - 1, x), ());
                 }
             }
         }
@@ -30,6 +30,7 @@ impl FromProblemInput<'_> for Grid {
     }
 }
 
+#[must_use]
 pub fn connected_components<N, E>(g: &StableGraph<N, E, Undirected>) -> Vec<usize> {
     let mut visited = HashSet::new();
     let mut components = Vec::new();

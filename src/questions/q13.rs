@@ -53,7 +53,8 @@ impl FromProblemInput<'_> for Origami {
         for line in lines.iter() {
             if line.is_empty() {
                 continue;
-            } else if let Ok(fold) = Fold::from_str(line) {
+            }
+            if let Ok(fold) = Fold::from_str(line) {
                 folds.push(fold);
             } else {
                 let (l, r) = line
@@ -96,7 +97,7 @@ impl Solution for Q13 {
                     line.push(' ');
                 }
             }
-            output.push(line)
+            output.push(line);
         }
 
         output.into_iter().join("\n")

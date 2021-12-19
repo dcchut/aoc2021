@@ -13,7 +13,6 @@ pub enum Direction {
 }
 
 impl Direction {
-    #[inline(always)]
     #[must_use]
     pub fn left(self) -> Self {
         match self {
@@ -24,14 +23,13 @@ impl Direction {
         }
     }
 
-    #[inline(always)]
     #[must_use]
     pub fn right(self) -> Self {
         // the compiler will take care of it
         self.left().left().left()
     }
 
-    #[inline(always)]
+    #[must_use]
     pub fn all() -> HashSet<Self> {
         let mut all = HashSet::new();
         all.insert(Direction::Left);
@@ -92,6 +90,7 @@ pub struct Position {
 }
 
 impl Position {
+    #[must_use]
     pub fn new(x: i64, y: i64) -> Self {
         Self { x, y }
     }
@@ -113,6 +112,7 @@ impl Position {
         Self::new(self.x + delta_x, self.y + delta_y)
     }
 
+    #[must_use]
     pub fn l1(&self) -> i64 {
         fn abs(u: i64) -> i64 {
             if u < 0 {
@@ -159,6 +159,7 @@ pub struct HistoryVisitor {
 }
 
 impl HistoryVisitor {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             history: HashSet::new(),
@@ -193,6 +194,7 @@ pub struct StepVisitor {
 }
 
 impl StepVisitor {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             step_count: 0,
@@ -234,6 +236,7 @@ impl<T> Grid<T> {
         }
     }
 
+    #[must_use]
     pub fn go_many(mut self, movements: Vec<Movement>) -> T {
         for movement in movements {
             self.go(movement);

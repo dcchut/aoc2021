@@ -48,7 +48,7 @@ impl Grid {
         }
 
         // Reset any octopus that flashed
-        for node in already_flashed.iter() {
+        for node in &already_flashed {
             *self.levels.get_mut(node).unwrap() = 0;
         }
 

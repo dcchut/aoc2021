@@ -31,6 +31,7 @@ pub struct Path<'a> {
 }
 
 impl<'a> Path<'a> {
+    #[must_use]
     pub fn new(node: Node<'a>) -> Self {
         Self {
             current_node: node,
@@ -38,6 +39,7 @@ impl<'a> Path<'a> {
         }
     }
 
+    #[must_use]
     pub fn count(&self, node: Node<'a>) -> usize {
         self.node_count.get(&node).copied().unwrap_or_default()
     }
