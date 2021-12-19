@@ -1,13 +1,13 @@
 #![feature(map_first_last)]
 #![feature(drain_filter)]
 #![feature(array_windows)]
-#![feature(destructuring_assignment)]
 #![feature(const_eval_limit)]
 #![const_eval_limit = "0"]
 
 use anyhow::{Context, Result};
 use std::borrow::Borrow;
 use std::collections::HashMap;
+use std::fmt::Debug;
 use std::hash::Hash;
 use std::ops::RangeBounds;
 
@@ -101,6 +101,7 @@ impl ProblemInput {
         self.lines.is_empty()
     }
 
+    #[must_use]
     pub fn split<R: RangeBounds<usize>>(&self, range: R) -> ProblemInput {
         // This is not a good way to do this
         let lines: Vec<_> = self
@@ -178,6 +179,18 @@ impl<T: FromProblemInputLine> FromProblemInput<'_> for Vec<T> {
             .iter()
             .map(|s| T::from_line(s.as_str()))
             .collect()
+    }
+}
+
+impl<T: FromProblemInputLine + Debug, const N: usize> FromProblemInput<'_> for [T; N] {
+    fn from(lines: &'_ ProblemInput) -> Self {
+        lines
+            .lines
+            .iter()
+            .map(|s| T::from_line(s.as_str()))
+            .collect::<Vec<_>>()
+            .try_into()
+            .unwrap()
     }
 }
 

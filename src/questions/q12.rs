@@ -42,6 +42,7 @@ impl<'a> Path<'a> {
         self.node_count.get(&node).copied().unwrap_or_default()
     }
 
+    #[must_use]
     pub fn append(&self, node: Node<'a>) -> Self {
         let mut path = self.clone();
         path.current_node = node;

@@ -14,6 +14,7 @@ pub enum Direction {
 
 impl Direction {
     #[inline(always)]
+    #[must_use]
     pub fn left(self) -> Self {
         match self {
             Direction::Left => Direction::Down,
@@ -24,6 +25,7 @@ impl Direction {
     }
 
     #[inline(always)]
+    #[must_use]
     pub fn right(self) -> Self {
         // the compiler will take care of it
         self.left().left().left()
@@ -94,6 +96,7 @@ impl Position {
         Self { x, y }
     }
 
+    #[must_use]
     pub fn go(&self, direction: Direction) -> Self {
         let delta_x = match direction {
             Direction::Left => -1,
