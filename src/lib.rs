@@ -127,7 +127,7 @@ impl ProblemInput {
 
 fn number_regex() -> &'static Regex {
     static REGEX: OnceCell<Regex> = OnceCell::new();
-    REGEX.get_or_init(|| Regex::new(r"\d+").unwrap())
+    REGEX.get_or_init(|| Regex::new(r"-?\d+").unwrap())
 }
 
 impl FromProblemInput<'_> for Vec<Vec<i64>> {
@@ -260,7 +260,7 @@ impl<N, E, I: Hash + Eq + Copy, Ty: EdgeType> NamedGraph<N, E, I, Ty> {
         }
     }
 
-    pub fn nodes_iter(&self) -> impl Iterator<Item = (I, NodeIndex, &N)> {
+    pub fn nodes_iter(&self) -> impl Iterator<Item = (I, NodeIndex, &N)> + Clone {
         self.index
             .iter()
             .map(|(&ident, &index)| (ident, index, self.get_unchecked(index)))
