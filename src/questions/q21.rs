@@ -129,11 +129,9 @@ impl Solution for Q21 {
         state
             .terminal
             .into_iter()
-            .fold([0, 0], |[p1_wins, p2_wins], (p, c)| {
-                match p.0.cmp(&p.1) {
-                    Ordering::Greater | Ordering::Equal => [p1_wins + c, p2_wins],
-                    Ordering::Less => [p1_wins, p2_wins + c],
-                }
+            .fold([0, 0], |[p1_wins, p2_wins], (p, c)| match p.0.cmp(&p.1) {
+                Ordering::Greater | Ordering::Equal => [p1_wins + c, p2_wins],
+                Ordering::Less => [p1_wins, p2_wins + c],
             })
             .into_iter()
             .max()
